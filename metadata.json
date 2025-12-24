@@ -1,0 +1,5 @@
+{
+  "name": "Trivia Master Pro",
+  "description": "A Jeopardy-style trivia game with a custom question builder and a real-time scoreboard for multiple teams.",
+  "requestFramePermissions": []
+}
