@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { GameState, Category, QuestionCell } from '../types';
 import Scoreboard from './Scoreboard';
 
@@ -33,15 +33,71 @@ const GamePage: React.FC<GamePageProps> = ({ gameState, setGameState, onReset })
 
   const columnCount = gameState.categories.length;
 
+
+  const pageRef = useRef<HTMLDivElement>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  const handleFullscreenToggle = () => {
+    const elem = pageRef.current;
+    if (!isFullscreen) {
+      if (elem) {
+        if (elem.requestFullscreen) {
+          elem.requestFullscreen();
+        } else if ((elem as any).webkitRequestFullscreen) {
+          (elem as any).webkitRequestFullscreen();
+        } else if ((elem as any).msRequestFullscreen) {
+          (elem as any).msRequestFullscreen();
+        }
+      }
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if ((document as any).webkitExitFullscreen) {
+        (document as any).webkitExitFullscreen();
+      } else if ((document as any).msExitFullscreen) {
+        (document as any).msExitFullscreen();
+      }
+    }
+  };
+
+  useEffect(() => {
+    const handleChange = () => {
+      setIsFullscreen(
+        !!(
+          document.fullscreenElement ||
+          (document as any).webkitFullscreenElement ||
+          (document as any).msFullscreenElement
+        )
+      );
+    };
+    document.addEventListener('fullscreenchange', handleChange);
+    document.addEventListener('webkitfullscreenchange', handleChange);
+    document.addEventListener('msfullscreenchange', handleChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleChange);
+      document.removeEventListener('webkitfullscreenchange', handleChange);
+      document.removeEventListener('msfullscreenchange', handleChange);
+    };
+  }, []);
+
   return (
-    <div className="max-w-full mx-auto h-full flex flex-col overflow-hidden">
-      <div className="flex justify-end mb-2">
-          <button 
-            onClick={onReset}
-            className="bg-slate-800 hover:bg-red-900/40 text-slate-400 hover:text-red-400 px-3 py-1 rounded text-xs transition-colors border border-slate-700"
-          >
-            Reset Progress
-          </button>
+    <div
+      ref={pageRef}
+      className={`max-w-full mx-auto h-full flex flex-col overflow-hidden${isFullscreen ? ' px-[10px]' : ''}`}
+    >
+      <div className="flex justify-end mb-2 gap-2">
+        <button
+          onClick={handleFullscreenToggle}
+          className={`bg-slate-800 ${isFullscreen ? 'hover:bg-blue-900/80' : 'hover:bg-blue-900/40'} text-slate-400 hover:text-blue-400 px-3 py-1 rounded text-xs transition-colors border border-slate-700`}
+        >
+          {isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
+        </button>
+        <button 
+          onClick={onReset}
+          className="bg-slate-800 hover:bg-red-900/40 text-slate-400 hover:text-red-400 px-3 py-1 rounded text-xs transition-colors border border-slate-700"
+        >
+          Reset Progress
+        </button>
       </div>
 
       <div className="flex-1 w-full flex flex-col min-h-0">

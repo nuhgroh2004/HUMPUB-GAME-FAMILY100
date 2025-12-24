@@ -9,9 +9,17 @@ interface ScoreboardProps {
 
 const Scoreboard: React.FC<ScoreboardProps> = ({ gameState, setGameState }) => {
   const updateScore = (teamId: string, amount: number) => {
-    const newTeams = gameState.teams.map((t) =>
-      t.id === teamId ? { ...t, score: Math.max(0, t.score + amount) } : t
-    );
+    const newTeams = gameState.teams.map((t, idx) => {
+      if (t.id === teamId) {
+        // Tim 1 (pertama) boleh minus
+        if (idx === 0) {
+          return { ...t, score: t.score + amount };
+        } else {
+          return { ...t, score: Math.max(0, t.score + amount) };
+        }
+      }
+      return t;
+    });
     setGameState({ ...gameState, teams: newTeams });
   };
 
